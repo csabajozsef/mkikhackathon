@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     llm_model: str = "claude-haiku-4-5"
     llm_model_heavy: str = "claude-sonnet-4-5"
     anthropic_api_key: str = ""
+    # Only needed for identity-linked API keys (the API returns a 400 asking for it).
+    anthropic_workspace_id: str = ""
     # openai_compat settings
     llm_base_url: str = "https://openrouter.ai/api/v1"
     llm_api_key: str = ""
@@ -46,8 +48,9 @@ class Settings(BaseSettings):
     # --- embeddings -------------------------------------------------------------
     # provider: "fastembed" (local, default), "openai_compat", or "hashing" (tests)
     embedding_provider: str = "fastembed"
-    embedding_model: str = "intfloat/multilingual-e5-small"
-    embedding_dim: int = 384  # multilingual-e5-small; 1024 for e5-large / bge-m3
+    # Must be a fastembed-supported name (TextEmbedding.list_supported_models()).
+    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    embedding_dim: int = 384  # MiniLM-L12 384; mpnet-base 768; e5-large 1024
     embedding_base_url: str = "https://openrouter.ai/api/v1"
     embedding_api_key: str = ""
 
@@ -69,10 +72,14 @@ class Settings(BaseSettings):
     # --- evidence gate ----------------------------------------------------
     # Deterministic floor: the best candidate must clear this cosine similarity,
     # and at least ``gate_min_supporting`` candidates must clear the support floor.
-    gate_min_top_score: float = 0.78
-    gate_support_floor: float = 0.72
+    # Defaults calibrated for paraphrase-multilingual-MiniLM-L12-v2; re-sweep with
+    # eval/run_eval.py after changing the embedding model or corpus.
+    gate_min_top_score: float = 0.57
+    gate_support_floor: float = 0.45
     gate_min_supporting: int = 1
-    gate_use_llm_classifier: bool = True
+    # Keep off unless the LLM is a reliable JSON classifier (Claude). Llama-3.3-70B
+    # on Together flip-flopped supported/not-supported -> deterministic floor only.
+    gate_use_llm_classifier: bool = False
 
     # --- generation --------------------------------------------------------
     answer_language: str = "hu"

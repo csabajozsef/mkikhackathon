@@ -325,9 +325,24 @@ async function loadAnalytics() {
 }
 
 function statRow(s) {
-  return `<li><span title="${esc(s.question)}">${esc(s.question)}</span>
+  return `<li><button type="button" class="q-link" data-q="${esc(s.question)}"
+            title="Kattintson a kérdés újrafuttatásához">${esc(s.question)}</button>
           <span class="count-num">${s.count}×</span></li>`;
 }
+
+/* Click a logged / seed question -> jump to the Kérdés tab and run it. */
+function askFromLibrary(question) {
+  if (!question) return;
+  activateTab("ask");
+  $("#ask-input").value = question;
+  ask(question);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+$("#panel-gaps").addEventListener("click", (e) => {
+  const btn = e.target.closest(".q-link, .seed-q");
+  if (btn) askFromLibrary(btn.dataset.q);
+});
 
 function renderAnalytics(data) {
   $("#gap-rate").textContent = data.total_questions ? `${(data.answer_rate * 100).toLocaleString("hu-HU", { maximumFractionDigits: 0 })}%` : "–";
