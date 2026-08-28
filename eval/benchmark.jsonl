@@ -1,0 +1,25 @@
+{"id": "s01", "type": "supported", "question": "Ki hagyja jóvá az 5 000 001 és 15 000 000 Ft közötti nettó becsült értékű beszerzést?", "expect_pages": [6], "expect_contains": ["főtitkár"], "note": "III. kategória, 10. §"}
+{"id": "s02", "type": "supported", "question": "Hány írásbeli ajánlatot kell bekérni egy 3 millió forintos beszerzésnél?", "expect_pages": [6], "expect_contains": ["3", "három", "ajánlat"], "note": "II. kategória"}
+{"id": "s03", "type": "supported", "question": "Hány munkanapon belül kell a gazdasági vezetőnek elvégeznie a fedezetvizsgálatot?", "expect_pages": [7], "expect_contains": ["5 munkanap"], "note": "13. § (2)"}
+{"id": "s04", "type": "supported", "question": "Meddig kell megőrizni a beszerzési dossziét?", "expect_pages": [9], "expect_contains": ["8 év"], "note": "21. § (3)"}
+{"id": "s05", "type": "supported", "question": "Ki jogosult a IV. kategóriába tartozó beszerzések jóváhagyására?", "expect_pages": [5, 6], "expect_contains": ["Elnökség"], "note": "7. § / 10. §"}
+{"id": "s06", "type": "supported", "question": "Mekkora értékű reklámajándék fogadható el összeférhetetlenség nélkül?", "expect_pages": [9], "expect_contains": ["10 000 Ft"], "note": "20. § (3)"}
+{"id": "s07", "type": "supported", "question": "Milyen hosszú legyen az ajánlattételi határidő a IV. kategóriában?", "expect_pages": [7], "expect_contains": ["10 munkanap"], "note": "15. § (1) 4."}
+{"id": "s08", "type": "supported", "question": "Mikor mellőzhető az ajánlatkérés?", "expect_pages": [6], "expect_contains": ["kizárólagos", "sürgősség"], "note": "11. § kivételi kör"}
+{"id": "s09", "type": "supported", "question": "Ki adhatja ki a teljesítésigazolást?", "expect_pages": [8], "expect_contains": ["nem adhatja ki", "kötelezettségvállalást aláírta"], "note": "18. § (2)"}
+{"id": "s10", "type": "supported", "question": "Hány tagú a Beszerzési Bizottság?", "expect_pages": [5], "expect_contains": ["három"], "note": "8. § (1)"}
+{"id": "s11", "type": "supported", "question": "Mennyi a becsült érték határozatlan idejű szerződésnél?", "expect_pages": [4], "expect_contains": ["negyvennyolc"], "note": "6. § (3)"}
+{"id": "s12", "type": "supported", "question": "Hány napon belül kell az aláírt szerződést a szerződésnyilvántartásba adni?", "expect_pages": [8], "expect_contains": ["5 munkanap"], "note": "17. § (4)"}
+{"id": "s13", "type": "supported", "question": "Mekkora értéknövekedést meghaladó szerződésmódosításhoz kell az eredeti jóváhagyó hozzájárulása?", "expect_pages": [8], "expect_contains": ["15 %"], "note": "17. § (5)"}
+{"id": "s14", "type": "supported", "question": "Hány napon belül kell az új belépőnek megismernie a szabályzatot?", "expect_pages": [10], "expect_contains": ["15 nap"], "note": "24. § (2)"}
+{"id": "s15", "type": "supported", "question": "Melyik törvény a Kbt.?", "expect_pages": [3], "expect_contains": ["2015. évi CXLIII"], "note": "2. § (1)"}
+{"id": "m01", "type": "multi", "question": "Meddig kell megőrizni a beszerzési iratokat, és mennyi az általános megőrzési idő közbeszerzésnél?", "expect_pages": [8, 9], "expect_contains": ["8 év", "5 év"], "note": "19. § (3) + 21. § (3) — két forrás"}
+{"id": "m02", "type": "multi", "question": "Ki állapítja meg a becsült értéket, és ki igazolja rá a fedezetet?", "expect_pages": [5, 7], "expect_contains": ["gazdasági vezető"], "note": "7. § + 13. §"}
+{"id": "a01", "type": "ambiguous", "question": "Mennyi idő alatt kell válaszolni egy megkeresésre?", "note": "a szabályzat csak beszerzési határidőket ismer, általános ügyintézésit nem — részleges vagy abstain elfogadható"}
+{"id": "a02", "type": "ambiguous", "question": "Ki a felelős a szerződésekért?", "note": "több szereplő (jogi felelős, kötelezettségvállaló, gazdasági vezető) — a válasznak több forrást kell hoznia vagy pontosítást kérnie"}
+{"id": "a03", "type": "ambiguous", "question": "Mekkora értékhatárig lehet közvetlenül megrendelni?", "note": "I. kategória 1 000 000 Ft, de 'közvetlen' szó több helyen — figyelni a pontos oldalra"}
+{"id": "u01", "type": "unsupported", "question": "Hány nap fizetett szabadság jár évente a kamarai munkatársaknak?", "note": "HR téma, nincs a beszerzési szabályzatban"}
+{"id": "u02", "type": "unsupported", "question": "Mekkora a home office után járó költségtérítés?", "note": "nincs fedezet"}
+{"id": "u03", "type": "unsupported", "question": "Milyen a kamara székházának nyitvatartása?", "note": "nincs fedezet"}
+{"id": "u04", "type": "unsupported", "question": "Hány százalék a béren kívüli juttatás adómentes kerete?", "note": "adójogi téma, nincs fedezet"}
+{"id": "u05", "type": "unsupported", "question": "Ki a kamara jelenlegi elnöke?", "note": "a szabályzat nem nevesíti, csak a tisztséget — abstain a helyes"}
