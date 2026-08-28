@@ -1,9 +1,9 @@
 # KamaraTudás — Coding Agent Handoff (state of the build)
 
 > Read this first, then `README.md`, then `docs/` (once written). The original
-> design brief is the two files the team was given: the hackathon task
-> (`feladat.md`) and the long design handoff (`handoff.md`) — kept in the team
-> drive, not this repo.
+> design brief the team was given is in `docs/brief/`: the hackathon task
+> (`docs/brief/feladat.md`) and the long design handoff
+> (`docs/brief/handoff.md`).
 
 ## 0. Product thesis (do not drift from this)
 
