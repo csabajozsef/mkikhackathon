@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KamaraTudás — belső tudástár ellenőrizhető forrásokkal</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">K</div>
+      <div>
+        <h1>KamaraTudás</h1>
+        <p class="tagline">Belső tudástár · minden állítás forrással, minden forrás egy kattintással ellenőrizhető</p>
+      </div>
+    </div>
+    <div class="corpus-actions">
+      <span id="corpus-chip" class="chip" title="A korpuszban indexelt dokumentumok száma">Korpusz: …</span>
+      <label class="btn btn-ghost" for="file-upload" title="PDF feltöltése és azonnali indexelés — korpuszcsere fejlesztő nélkül">
+        + PDF hozzáadása
+      </label>
+      <input type="file" id="file-upload" accept="application/pdf,.pdf" hidden>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab is-active" role="tab" data-tab="ask" aria-selected="true">Kérdés</button>
+    <button class="tab" role="tab" data-tab="verify" aria-selected="false">Válasz-ellenőrzés</button>
+    <button class="tab" role="tab" data-tab="gaps" aria-selected="false">Tudáshiány-térkép</button>
+  </nav>
+
+  <div class="scope-bar" id="scope-bar">
+    <span class="scope-label">Jogosultsági kontextus</span>
+    <label class="scope-field">
+      <span>Szervezet</span>
+      <select id="scope-org">
+        <option value="mkik-orszagos">MKIK – Országos</option>
+        <option value="mkik-bacs-kiskun">Bács-Kiskun Vármegyei Kamara</option>
+      </select>
+    </label>
+    <label class="scope-field">
+      <span>Osztály</span>
+      <select id="scope-dept">
+        <option value="altalanos">Általános</option>
+        <option value="beszerzes">Beszerzés</option>
+        <option value="penzugy">Pénzügy</option>
+        <option value="hr">HR</option>
+      </select>
+    </label>
+    <label class="scope-field">
+      <span>Szerep</span>
+      <select id="scope-role">
+        <option value="employee">Munkatárs</option>
+        <option value="manager">Vezető</option>
+        <option value="finance_manager">Gazdasági vezető</option>
+        <option value="legal">Jogász</option>
+      </select>
+    </label>
+    <p class="scope-hint">A szervezetválasztó a <strong>keresés előtti</strong> jogosultsági szűrőt demonstrálja: amihez a kontextusnak nincs hozzáférése, az nem is kerül a visszakeresőbe.</p>
+  </div>
+
+  <main>
+
+    <!-- ===================== TAB 1: KÉRDÉS ===================== -->
+    <section class="tab-panel is-active" id="panel-ask" role="tabpanel">
+      <form id="ask-form" autocomplete="off">
+        <div class="ask-row">
+          <input type="text" id="ask-input" class="ask-input"
+                 placeholder="Tegye fel kérdését a kamara belső dokumentumaiból…"
+                 maxlength="500" required>
+          <button type="submit" class="btn btn-primary" id="ask-btn">
+            <span class="btn-label">Kérdez</span>
+            <svg class="spin" hidden viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+          </button>
+        </div>
+        <p class="micro-hint">Példák: „Ki hagyja jóvá az 5 000 001 és 15 000 000 Ft közötti nettó becsült értékű beszerzést?” · „Meddig kell megőrizni a beszerzési dossziét?” · „Hány nap fizetett szabadság jár évente?”</p>
+      </form>
+
+      <div id="ask-result" hidden></div>
+    </section>
+
+    <!-- ===================== TAB 2: VÁLASZ-ELLENŐRZÉS ===================== -->
+    <section class="tab-panel" id="panel-verify" role="tabpanel" hidden>
+      <p class="panel-intro">Kifelé menő válasz tervezetét ellenőrizteti a rendszer a belső korpusszal: minden tényállítás <em>supported / unsupported / conflicting</em> minősítést és forrást kap.</p>
+      <form id="verify-form" autocomplete="off">
+        <textarea id="verify-input" class="verify-input"
+                  placeholder="Illessze be a kifelé menő válasz tervezetét…"
+                  maxlength="4000" required></textarea>
+        <div class="ask-row">
+          <span></span>
+          <button type="submit" class="btn btn-primary" id="verify-btn">
+            <span class="btn-label">Ellenőrzöm</span>
+            <svg class="spin" hidden viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+          </button>
+        </div>
+      </form>
+      <div id="verify-result" hidden></div>
+    </section>
+
+    <!-- ===================== TAB 3: TUDÁSHIÁNY-TÉRKÉP ===================== -->
+    <section class="tab-panel" id="panel-gaps" role="tabpanel" hidden>
+      <p class="gap-framing">„A rendszer megmutatja, hol hiányzik maga a belső szabályozás, vagy hol nem található meg.”</p>
+
+      <div id="gaps-loading" class="muted">A tudáshiány-térkép betöltése…</div>
+
+      <div id="gaps-content" hidden>
+        <div class="gap-headline">
+          <div class="stat-card">
+            <div class="stat-num" id="gap-rate">–</div>
+            <div class="stat-cap">válaszadási arány</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="gap-total">–</div>
+            <div class="stat-cap">rögzített kérdés</div>
+          </div>
+          <div class="stat-card muted-stat">
+            <div class="stat-num" id="gap-nocov">–</div>
+            <div class="stat-cap">fedezet nélküli kérdés</div>
+          </div>
+        </div>
+
+        <div class="gap-cols">
+          <div class="card">
+            <h3>Leggyakoribb kérdések</h3>
+            <ol id="gap-top" class="count-list"></ol>
+          </div>
+          <div class="card">
+            <h3>Amire nincs elegendő fedezet</h3>
+            <ol id="gap-unanswered" class="count-list"></ol>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Kérdések osztályonként</h3>
+          <div id="gap-dept" class="bars"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    KamaraTudás · MKIK AI Hackathon 2026 · a kiválasztott korpuszon ellenőrizhető állítások
+  </footer>
+
+  <!-- ===================== FORRÁS-NÉZŐ DRAWER ===================== -->
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-title" id="drawer-title">Forrás</div>
+        <div class="drawer-meta" id="drawer-meta"></div>
+      </div>
+      <button class="drawer-close" id="drawer-close" aria-label="Bezárás">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-loading" id="drawer-loading">A forrás betöltése…</div>
+      <div id="drawer-content" hidden>
+        <figure class="page-figure">
+          <img id="drawer-page-img" alt="Eredeti PDF-oldal a kiemelt részlettel">
+          <figcaption class="muted">Eredeti PDF-oldal · a válaszban hivatkozott részlet kiemelve</figcaption>
+        </figure>
+        <div class="page-text">
+          <h4>Oldal szövege (indexelt)</h4>
+          <pre id="drawer-page-text"></pre>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
