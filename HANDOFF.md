@@ -44,13 +44,13 @@ The scored differentiators, in priority order:
 | Draft-answer verifier | `app/generation/verify.py` + `POST /api/verify` | "Ellenőrzöm a válaszomat" — per-claim supported / unsupported / conflicting + citations |
 | Query log → knowledge-gap map | `app/query_log.py` + `GET /api/analytics` | SQLite; top questions, top **unanswered**, by department |
 | Pipeline wiring | `app/pipeline.py` | scope → retrieve → gate → answer/abstain → log; `scope_from_request` builds the pre-retrieval `AccessMeta` filter |
+| **Static demo UI** | `web/index.html`, `web/styles.css`, `web/app.js` | **DONE** — three tabs (Kérdés / Válasz-ellenőrzés / Tudáshiány-térkép), scope selector (org/dept/role), coverage badge (full=zöld/partial=borostyán/none=szürke), inline `[n]` chips, evidence drawer (`/api/documents/{id}/page/{n}` + `/render?highlight=`), warnings box, corpus header + PDF upload, analytics bars. `node --check` OK; browser smoke-test still outstanding (§3.2). |
 | FastAPI app + routes | `app/main.py`, `app/api/*` | `/api/ask`, `/api/verify`, `/api/documents` (CRUD + reindex), `/api/documents/{id}/page/{n}` (+ `/render` PNG w/ highlight), `/api/analytics`, `/api/health` |
 | Access filter (pre-retrieval) | `app/retrieval/store.py` (`_allowed_rows`) | filters by `organization_id` + `classification`/`allowed_roles` **before** search — never retrieve-then-hide |
 | Eval harness | `eval/benchmark.jsonl` (15 supported + 3 ambiguous + 2 multi + 5 unsupported) + `eval/run_eval.py` | metrics: retrieval_hit, answer_contains, citation_valid, **refusal_accuracy**; writes `eval/results.md` |
 
 ### STUBBED / partial — needs a real pass
 
-- **Frontend (`web/`)** — NOT STARTED. This is the biggest remaining piece. Spec in §4.
 - **`docs/`** — NOT WRITTEN. `architecture.md`, `costs.md`, `scaling.md`, `security.md`, `pitch.md`. Content mostly exists in this file + `handoff.md`; needs assembling into pitch-ready form with real numbers. `scripts/cost_calc.py` NOT WRITTEN.
 - **Reranker** — code path complete, `KT_RERANK_ENABLED=false`. Turn on, run eval, keep only if `retrieval_hit` improves enough to justify the latency/first-run download.
 - **Gate thresholds** — `KT_GATE_MIN_TOP_SCORE=0.78`, `KT_GATE_SUPPORT_FLOOR=0.72` are guesses for `multilingual-e5-small`. **Must be calibrated** with `eval/run_eval.py` on real providers (see §3).
@@ -90,12 +90,15 @@ Windows note: scripts force UTF-8 stdout; if you add prints elsewhere, keep `PYT
 
 ## 3. First tasks for the next agent (in order)
 
-1. **Get real providers running & calibrate the gate.**
-   - Put a key in `.env`. `uv run python scripts/ingest.py`. `uv run python eval/run_eval.py`.
-   - Sweep `KT_GATE_MIN_TOP_SCORE` / `KT_GATE_SUPPORT_FLOOR` so `refusal_accuracy` stays ~100% while `retrieval_hit` / `answer_contains` are maximised. Write the chosen values into `.env.example` and `app/config.py` defaults, and note the trade-off in `docs/architecture.md`.
+1. **Calibrate the gate with a real provider** (blocked on a key).
+   - `.env` is already created from `.env.example` — paste `KT_ANTHROPIC_API_KEY=sk-ant-…` into it (or set `KT_LLM_PROVIDER=openai_compat` + `KT_LLM_API_KEY`/`KT_LLM_BASE_URL`).
+   - Then: `uv run python scripts/ingest.py` (first run downloads multilingual-e5-small ~470 MB), `uv run python eval/run_eval.py`, then sweep `KT_GATE_MIN_TOP_SCORE` / `KT_GATE_SUPPORT_FLOOR` so `refusal_accuracy` stays ~100% while `retrieval_hit`/`answer_contains` are maximised. Write chosen values into `.env.example` **and** `app/config.py` defaults; note the trade-off in `docs/architecture.md`.
    - Try `KT_RERANK_ENABLED=true`; keep only if it earns its latency.
 
-2. **Build `web/`** — the demo lives or dies here. Spec in §4. Static HTML/JS, no build step, served by `app/main.py` at `/`.
+2. **Browser smoke-test the new `web/`** (frontend itself is built — spec §4).
+   - `uv run uvicorn app.main:app --reload` → http://localhost:8000
+   - Click through all three tabs; test the scope switch (`Bács-Kiskun` org → everything abstains; `Országos` works), `[n]` chip → drawer → highlighted page image (with a real provider/embeddings; offline it will abstain on most supported questions).
+   - Pieces possibly worth tuning after the smoke test: `.env` gate thresholds, excerpt phrasing, `scope-hint` copy.
 
 3. **Write `docs/` + `scripts/cost_calc.py`** — §6. The rubric puts 30% on cost+scaling+extensibility docs vs 30% on the working demo. Do not skip.
 
@@ -103,33 +106,37 @@ Windows note: scripts force UTF-8 stdout; if you add prints elsewhere, keep `PYT
 
 5. **Talk to the chamber reps on-site** (brief §26 / feladat §4) and let their answer pick which differentiator leads the pitch (knowledge-gap map is built; draft-verifier is built; pick the story that matches their stated pain).
 
+### Handoff state snapshot (commit `00c2c4c`, 2026-08-28)
+
+- Repository: `main` at `00c2c4c` — added `web/` (static demo UI). 16/16 tests green, `node --check` OK.
+- `.env` is local + gitignored (never commit it). `data/sample-documents/` holds the only PDF (`MKIK_Beszerzesi_Szabalyzat.pdf`).
+- Open, in priority order: **gate calibration** (needs the key in `.env`), **`docs/` + `scripts/cost_calc.py`**, then corpus swap + eval rewrite, then pitch assembly.
+
 ---
 
-## 4. Frontend spec (`web/index.html` + `app.js` + `styles.css`)
+## 4. Frontend — DONE (`web/index.html` + `app.js` + `styles.css`)
 
-Single page, no framework, `fetch` against `/api`. Three tabs.
+Single page, no framework, `fetch` against `/api`. Three tabs. **Built as of `00c2c4c`;** this section is the as-built description + the smoke-test checklist.
 
-### Tab 1 — Kérdés (main)
-- Question box + "Kérdez" button + a **scope selector** (org / department / role dropdown) that goes into `scope` on `POST /api/ask` — this is the visible proof that access filtering is real.
-- Answer panel: render the answer text, turn every `[n]` into a clickable chip.
-- **Coverage badge** (colour by `coverage`: full=green, partial=amber, none=grey) showing `coverage_label`.
-- If `status == insufficient_evidence`: show the abstention text prominently + `suggestion`, no citation list.
-- If `warnings[]`: amber "⚠️ Ellentmondó / eltérő hatályú források" box with the older/newer citation.
-- **Bizonyítékok** list: each citation → `document · section · N. oldal` + excerpt + "Forrás megnyitása".
-- Clicking a citation chip or "Forrás megnyitása" opens a **drawer/modal**: `GET /api/documents/{id}/page/{n}` for the text, and `<img src="{render_url}?highlight={excerpt}">` for the page image with the passage highlighted. This is acceptance test 3 and the QueryDoc-style "show the evidence" UX.
+Current implementation notes (as-built):
 
-### Tab 2 — Válasz-ellenőrzés (differentiator)
-- Textarea for a draft outgoing reply + "Ellenőrzöm" → `POST /api/verify`.
-- Render `claims[]`: each claim with a coloured verdict pill (supported/unsupported/conflicting), `rationale`, and its citations (same drawer).
-- Show `summary` on top.
+- `scope` on `/api/ask` / `/api/verify` comes from `.scope-bar` selects:
+  - **Szervezet**: `mkik-orszagos` (Országos — has the corpus) vs `mkik-bacs-kiskun` (Területi — no access → everything abstains). This is the visible pre-retrieval filtering proof.
+  - **Osztály**: passed as `department` (feeds `by_department` in analytics). **Osztály SZŰRÉSI HATÁS NINCS** — `app/retrieval/store.py::_allowed_rows` only filters on `organization_id` + (confidential) `allowed_roles`; department is metadata/logging only. Don't claim a department filter to the jury.
+  - **Szerep**: passed as `role` → `allowed_roles`; only matters for `confidential` chunks (corpus has none).
+- Answer panel: coverage badge (colour by `coverage`: full=green, partial=amber, none=grey), `warnings[]` amber box, `[n]` → clickable chip, evidence cards (`document · section · N. oldal` + excerpt + "Forrás megnyitása"), abstention card when `status == insufficient_evidence` (with `suggestion`, no citation list), monospace `trace` footer (documents/chunks, top score, `gate_reason`).
+- **Drawer** (`app.js` `openDrawer`): fetches `GET /api/documents/{id}/page/{n}` for text + `render_url`, then loads `<img src="{render_url}?highlight=<excerpt>&dpi=140">`; Escape/backdrop closes it. Chips, "Forrás megnyitása", and warning old/new buttons all open it.
+- Tab 3: `GET /api/analytics?limit=10` → `answer_rate` headline + two ranked lists + `by_department` bars. Framing line as in the brief.
+- Corpus header chip (`GET /api/documents`) + minimal upload (`POST /api/documents`, multipart `file`); upload toasts success and refreshes the count.
 
-### Tab 3 — Tudáshiány-térkép (admin / +10)
-- `GET /api/analytics`. Two lists: "Leggyakoribb kérdések" and "Amire nincs fedezet" (with counts). `answer_rate` as a headline number. `by_department` as a small bar list.
-- Framing line on the page: *„A rendszer megmutatja, hol hiányzik maga a belső szabályozás, vagy hol nem található meg.”*
-
-Also add a tiny **corpus header** ("Korpusz: N dokumentum") from `GET /api/documents`, and a minimal upload control (`POST /api/documents`, multipart `file`) to demo "csere fejlesztő nélkül".
-
-Keep it clean and Hungarian. Reference mock in `handoff.md` §4.
+Smoke-test checklist (open — nobody has run it in a browser yet):
+1. Server up: `uv run uvicorn app.main:app --reload` → http://localhost:8000 (UI at `/`, API at `/docs`).
+2. Tab 1: ask a covered question (e.g. „Ki hagyja jóvá az 5 000 001 és 15 000 000 Ft közötti nettó becsült értékű beszerzést?”) with a real provider; click a `[n]` chip → drawer shows text + highlighted page image.
+3. Scope switch to `Bács-Kiskun` → same question abstains (and the trace footer shows the gate reason).
+4. Tab 2: paste a draft → claims render with verdict pills; click a source link → drawer.
+5. Tab 3: after a few asks the analytics render (rate, lists, bars).
+6. Upload a small PDF → toast + corpus count increments.
+7. Offline mode (no key): UI still loads; questions mostly abstain — that is expected.
 
 ---
 
@@ -185,7 +192,7 @@ Do **not** adopt: chat-platform integrations, distributed ingestion, knowledge g
 |---|---|---|
 | 1 | Supported question → HU answer + valid source + doc name + page + exact excerpt | ✅ pipeline + `test_api.py::test_ask_supported...` (real quality pending real LLM) |
 | 2 | Unsupported question → no fabricated answer + explicit insufficient-evidence | ✅ `test_ask_out_of_corpus_abstains`, eval `refusal_accuracy` |
-| 3 | A citation can be inspected independently | ✅ `GET /api/documents/{id}/page/{n}` + `/render`; UI drawer pending (`web/`) |
+| 3 | A citation can be inspected independently | ✅ `GET /api/documents/{id}/page/{n}` + `/render` + UI drawer (`web/app.js` `openDrawer`); browser click-through pending (§4 smoke test) |
 | 4 | Adding a document needs no code change | ✅ `scripts/ingest.py` / `POST /api/documents` / `test_reindex_is_idempotent` |
 | 5 | At least one multi-source answer works | ⚠️ `eval/benchmark.jsonl` `m01`/`m02` exist; verify with real LLM |
 | 6 | Survives an unexpected jury question better than a scripted demo | ⚠️ gate + abstention give this; needs real-provider soak + UI |
