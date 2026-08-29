@@ -10,7 +10,7 @@ Built for the **MKIK AI Hackathon**, 2026-08-28 — **🥈 2nd place**.
 ## About
 
 **Team KamaraTudás:**
-- [Péter Kiss](https://www.linkedin.com/in/p%C3%A9ter-kiss-8a7b13300/)
+- [Péter Kiss](https://github.com/PeterKiss18)
 - [Csanád Egervári](https://www.linkedin.com/in/csanadegervari/)
 - [Gergő Kardos](https://www.linkedin.com/in/kardos-gergo/)
 - [Csaba József](https://www.linkedin.com/in/csabajozsef/)
@@ -109,8 +109,8 @@ scaling: [`docs/scaling.md`](docs/scaling.md) ·
 access control: [`docs/security.md`](docs/security.md) ·
 pitch: [`docs/pitch.md`](docs/pitch.md).
 
-Next-developer handoff: [`HANDOFF.md`](HANDOFF.md) · original hackathon brief
-(Hungarian, as given by the organizers): [`docs/brief/`](docs/brief/).
+Original hackathon brief (Hungarian, as given by the organizers):
+[`docs/brief/`](docs/brief/).
 
 ## API
 

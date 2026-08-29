@@ -16,6 +16,9 @@ eval/results.md
 # Local secrets
 .env
 
+# Next-developer handoff notes — kept local, not published
+HANDOFF.md
+
 # Editors / OS
 .idea/
 .vscode/
