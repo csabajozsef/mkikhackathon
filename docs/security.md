@@ -19,9 +19,9 @@ Every chunk carries an `AccessMeta` (`app/models.py`):
 
 ## Filtering happens before retrieval, not after
 
-`HybridStore._allowed_rows` (`app/retrieval/store.py`) filters the candidate
+`HybridStore._allowed_rows` (`app/retrieval/store.py`) restricts the candidate
 row set by `organization_id` and, for `confidential` chunks, by
-`allowed_roles`, **before** dense or lexical search ever runs:
+`allowed_roles` before any top-k results are selected and returned to the caller:
 
 ```
 user identity
