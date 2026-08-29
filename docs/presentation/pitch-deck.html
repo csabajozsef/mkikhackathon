@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="hu"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MKIK — Belső tudástár pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet" media="all" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+<style>
+  :root {
+    --cream: #F0E7D6;
+    --indigo: #0A003F;
+    --rust: #EA2E00;
+    --ink: #2B2420;
+    --card-bg: #FFFFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Responsive scale. 1rem is derived from whichever viewport axis is more
+     constraining, so the deck holds its proportions on a 16:10 laptop panel,
+     a 16:9 1080p projector, and a 4K display alike. Everything below is sized
+     in rem, so the whole deck scales as one unit instead of drifting. */
+  html {
+    font-size: clamp(11px, min(0.8333vw, 1.4815vh), 32px);
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #deck {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  .slide {
+    height: 100vh;
+    width: 100vw;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 7vh min(9vw, 14rem);
+    position: relative;
+    cursor: pointer;
+  }
+
+  /* Cream is the primary field; indigo is the deliberate dark-mode slide.
+     Never use --rust as a light-slide background. */
+  .slide[data-bg="cream"] { background: var(--cream); }
+  .slide[data-bg="indigo"] { background: var(--indigo); }
+  .slide[data-bg="indigo"] .title,
+  .slide[data-bg="indigo"] .subtitle { color: var(--cream); }
+  .slide[data-bg="indigo"] .subtitle { opacity: 0.82; }
+
+  .kicker {
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rust);
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .title {
+    font-weight: 900;
+    font-size: 3.9rem;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 1.1rem;
+    max-width: 18ch;
+  }
+
+  .subtitle {
+    font-weight: 500;
+    font-size: 1.28rem;
+    color: var(--ink);
+    opacity: 0.72;
+    max-width: 54ch;
+    line-height: 1.5;
+  }
+
+  .slide-title .subtitle { margin-top: 0.5rem; }
+
+  /* ---------- Table of contents ---------- */
+  .toc-list { list-style: none; margin-top: 2.2rem; max-width: 45rem; }
+  .toc-item {
+    display: flex; align-items: baseline; gap: 1.75rem;
+    padding: 1.05rem 0;
+    border-bottom: 1px solid rgba(43, 36, 32, 0.15);
+    cursor: pointer;
+  }
+  .toc-item:first-child { border-top: 1px solid rgba(43, 36, 32, 0.15); }
+  .slide[data-bg="indigo"] .toc-item { border-color: rgba(240,231,214,0.2); }
+  .toc-num {
+    font-weight: 900; color: var(--rust);
+    font-size: 1.5rem; min-width: 2.4em;
+  }
+  .toc-label {
+    font-weight: 700; font-size: 1.5rem;
+    transition: color 0.15s ease;
+  }
+  .slide[data-bg="indigo"] .toc-label { color: var(--cream); }
+  .toc-item:hover .toc-label { color: var(--rust); }
+
+  /* ---------- Vertical 3-column card grid ---------- */
+  .card-grid-vertical {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2rem; margin-top: 2.2rem;
+  }
+  .card {
+    background: var(--card-bg); border-radius: 22px;
+    padding: 2.25rem 1.9rem;
+    box-shadow: 0 14px 34px rgba(43, 36, 32, 0.10);
+  }
+  .card .num {
+    font-weight: 900; font-size: 2rem;
+    color: var(--rust); margin-bottom: 0.75rem;
+  }
+  .card h3 {
+    font-weight: 800; font-size: 1.25rem;
+    margin-bottom: 0.5rem; line-height: 1.2;
+  }
+  .card p {
+    font-weight: 500; font-size: 1rem;
+    opacity: 0.72; line-height: 1.45;
+  }
+
+  /* ---------- Horizontal stacked card grid ---------- */
+  .card-grid-horizontal {
+    display: flex; flex-direction: column;
+    gap: 1.4rem; margin-top: 2.2rem; max-width: 56rem;
+  }
+  .card-h {
+    background: var(--card-bg); border-radius: 18px;
+    padding: 1.6rem 2.2rem;
+    box-shadow: 0 12px 30px rgba(43, 36, 32, 0.09);
+    display: flex; align-items: baseline; gap: 1.75rem;
+  }
+  .card-h .num {
+    font-weight: 900; font-size: 2.4rem;
+    color: var(--rust); min-width: 2.6em;
+  }
+  .card-h .body h3 { font-weight: 800; font-size: 1.25rem; margin-bottom: 0.25rem; }
+  .card-h .body p { font-weight: 500; font-size: 1rem; opacity: 0.72; line-height: 1.45; }
+
+  /* ---------- Closing ---------- */
+  .cta-row { display: flex; align-items: center; gap: 0.85rem; margin-top: 1.75rem; }
+  .cta-row .arrow { color: var(--rust); font-weight: 900; font-size: 1.4rem; }
+  .cta-row .email { font-weight: 800; font-size: 1.5rem; color: var(--ink); }
+  .slide[data-bg="indigo"] .cta-row .email { color: var(--cream); }
+
+  /* ---------- Graph mark (optional brand motif) ---------- */
+  .mark { margin-top: 2rem; }
+
+  /* ---------- Chrome ---------- */
+  .deck-chrome {
+    position: fixed; inset: auto 0 0 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 2.2rem 1.6rem; pointer-events: none;
+    font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;
+    color: var(--ink); z-index: 10; transition: color 0.2s ease;
+  }
+  body.dark-chrome .deck-chrome { color: var(--cream); }
+  body.dark-chrome .nav-buttons button { background: rgba(240,231,214,0.14); color: var(--cream); }
+  .counter { opacity: 0.65; pointer-events: auto; }
+  .nav-buttons { display: flex; gap: 0.6rem; pointer-events: auto; }
+  .nav-buttons button {
+    font-family: inherit; font-weight: 800; font-size: 1rem;
+    border: none; background: rgba(43, 36, 32, 0.08); color: var(--ink);
+    width: 2.4rem; height: 2.4rem; border-radius: 50%; cursor: pointer;
+  }
+  .nav-buttons button:hover { background: rgba(43, 36, 32, 0.16); }
+
+  .hint {
+    position: fixed; top: 1.6rem; right: 2.2rem;
+    font-size: 0.78rem; font-weight: 600; opacity: 0.5; z-index: 10;
+    transition: opacity 0.3s ease, color 0.2s ease;
+  }
+  body.dark-chrome .hint { color: var(--cream); }
+  .hint kbd { font-family: inherit; font-weight: 800; background: rgba(43, 36, 32, 0.1); border-radius: 4px; padding: 0.05rem 0.4rem; }
+  body.dark-chrome .hint kbd { background: rgba(240,231,214,0.16); }
+  body.is-fullscreen .hint { opacity: 0; pointer-events: none; }
+
+  /* ---------- Edit mode (press E) ---------- */
+  .edit-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+    display: none; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 0.6rem 1.4rem;
+    background: var(--rust); color: var(--cream);
+    font-weight: 800; font-size: 0.82rem; letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  body.edit-mode .edit-bar { display: flex; }
+  body.edit-mode .hint { opacity: 0; pointer-events: none; }
+  .edit-bar .edit-actions { display: flex; gap: 0.6rem; }
+  .edit-bar button {
+    font-family: inherit; font-weight: 800; font-size: 0.78rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border: none; border-radius: 999px; cursor: pointer;
+    padding: 0.45rem 1.1rem;
+    background: var(--cream); color: var(--rust);
+  }
+  .edit-bar button.ghost { background: rgba(240,231,214,0.2); color: var(--cream); }
+  body.edit-mode .slide { cursor: text; }
+  body.edit-mode [contenteditable] {
+    outline: 1px dashed rgba(234, 46, 0, 0.5);
+    outline-offset: 0.35rem; border-radius: 3px;
+  }
+  body.edit-mode[data-editing-dark="true"] [contenteditable] { outline-color: rgba(240,231,214,0.55); }
+  body.edit-mode [contenteditable]:focus {
+    outline: 2px solid var(--rust); background: rgba(234, 46, 0, 0.06);
+  }
+
+  /* ---------- Extensions (four-color-safe) ---------- */
+  /* Quote slide */
+  .quote-block { max-width: 40rem; margin-top: 1.6rem; }
+  .quote-block .q {
+    font-weight: 800; font-size: 2.3rem; line-height: 1.22;
+    letter-spacing: -0.01em; border-left: 0.35rem solid var(--rust);
+    padding-left: 1.4rem;
+  }
+  .quote-block .cite {
+    font-weight: 700; font-size: 0.9rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--rust); margin-top: 1.1rem; padding-left: 1.75rem;
+  }
+  .lead-list { list-style: none; margin-top: 1.6rem; max-width: 46rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .lead-list li { font-weight: 500; font-size: 1.12rem; line-height: 1.45; padding-left: 1.6rem; position: relative; }
+  .lead-list li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 0.55rem; height: 0.55rem; background: var(--rust); border-radius: 50%; }
+  .lead-list li b { font-weight: 800; }
+  .slide[data-bg="indigo"] .lead-list li { color: var(--cream); }
+
+  /* Two-column split */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 1.8rem; align-items: start; }
+  .split.wide-left { grid-template-columns: 1.15fr 0.85fr; }
+  .col-h { font-weight: 800; font-size: 1.15rem; margin-bottom: 0.9rem; letter-spacing: 0.02em; }
+
+  /* Browser demo mock — a card in disguise */
+  .browser { background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 14px 34px rgba(43,36,32,0.12); }
+  .bbar { display: flex; align-items: center; gap: 0.4rem; padding: 0.7rem 0.9rem; background: #E7DDCB; }
+  .bdot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: rgba(43,36,32,0.22); }
+  .burl { margin-left: 0.6rem; flex: 1; background: var(--cream); border-radius: 6px; font-weight: 600; font-size: 0.72rem; color: rgba(43,36,32,0.6); padding: 0.35rem 0.7rem; }
+  .bapp { padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .ent { align-self: flex-start; font-weight: 800; font-size: 0.72rem; color: var(--rust); border: 1.5px solid var(--rust); border-radius: 6px; padding: 0.3rem 0.7rem; letter-spacing: 0.04em; }
+  .ask { background: var(--cream); border-radius: 8px; padding: 0.7rem 0.9rem; font-weight: 700; font-size: 0.92rem; line-height: 1.35; }
+  .ans { border-radius: 8px; padding: 0.8rem 0.95rem; background: rgba(43,36,32,0.04); }
+  .ans p { font-weight: 500; font-size: 0.86rem; line-height: 1.45; }
+  .ans p b { font-weight: 800; }
+  .src { margin-top: 0.7rem; border-top: 1px dashed rgba(43,36,32,0.25); padding-top: 0.6rem; }
+  .src .sh { font-weight: 800; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rust); margin-bottom: 0.35rem; }
+  .src .sq { font-weight: 600; font-style: italic; font-size: 0.78rem; color: rgba(43,36,32,0.7); border-left: 2px solid var(--rust); padding-left: 0.7rem; line-height: 1.35; }
+  .src .sref { font-weight: 800; font-size: 0.72rem; color: var(--rust); margin-top: 0.45rem; }
+  .ans.noc { background: rgba(234,46,0,0.06); }
+  .ans.noc .flag { font-weight: 800; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rust); margin-bottom: 0.4rem; }
+  .ans.noc .route { margin-top: 0.55rem; font-weight: 500; font-size: 0.82rem; line-height: 1.4; }
+  .ans.noc .route b { font-weight: 800; color: var(--rust); }
+
+  /* Veto boxes */
+  .veto-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 1.5rem; }
+  .veto { background: var(--card-bg); border-radius: 16px; padding: 1.3rem 1.5rem; box-shadow: 0 12px 30px rgba(43,36,32,0.09); }
+  .veto .vh { font-weight: 800; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rust); margin-bottom: 0.55rem; }
+  .veto p { font-weight: 500; font-size: 0.92rem; line-height: 1.45; }
+  .veto p b { font-weight: 800; }
+
+  /* Cost table */
+  .cost-wrap { margin-top: 1.6rem; max-width: 58rem; }
+  table.cost { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 14px 34px rgba(43,36,32,0.10); font-size: 1rem; }
+  table.cost th, table.cost td { text-align: left; padding: 0.85rem 1.2rem; }
+  table.cost thead th { font-weight: 800; font-size: 0.76rem; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(43,36,32,0.6); border-bottom: 2px solid rgba(43,36,32,0.12); }
+  table.cost thead th.hl { color: var(--rust); text-align: right; }
+  table.cost tbody td { border-bottom: 1px solid rgba(43,36,32,0.09); font-weight: 500; }
+  table.cost tbody td.v { text-align: right; font-weight: 800; }
+  table.cost tbody td.v span { display: block; font-weight: 500; font-size: 0.72rem; color: rgba(43,36,32,0.55); }
+  table.cost tr.total td { border-bottom: none; font-weight: 800; background: rgba(234,46,0,0.05); }
+  table.cost tr.total td.v { color: var(--rust); font-size: 1.15rem; }
+  .costnote { font-weight: 500; font-size: 0.82rem; color: rgba(43,36,32,0.62); line-height: 1.5; margin-top: 1rem; max-width: 58rem; }
+  .costnote b { font-weight: 800; color: var(--ink); }
+
+  /* Org chart */
+  .org { margin-top: 1.6rem; display: flex; flex-direction: column; align-items: center; }
+  .onode { background: var(--card-bg); border-radius: 12px; padding: 0.65rem 1.1rem; text-align: center; box-shadow: 0 10px 26px rgba(43,36,32,0.09); min-width: 12rem; }
+  .onode .orole { font-weight: 800; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rust); }
+  .onode .oname { font-weight: 800; font-size: 1rem; margin-top: 0.1rem; }
+  .onode.top { background: var(--indigo); }
+  .onode.top .orole { color: var(--rust); }
+  .onode.top .oname { color: var(--cream); }
+  .ostem { width: 3px; height: 1.3rem; background: var(--rust); }
+  .orail { height: 3px; background: var(--rust); width: 60%; }
+  .orow { display: flex; gap: 1.1rem; justify-content: center; flex-wrap: wrap; }
+
+  /* Small caption under a slide */
+  .footnote { font-weight: 600; font-size: 0.8rem; color: rgba(43,36,32,0.55); margin-top: 1.5rem; max-width: 60ch; line-height: 1.5; }
+  .slide[data-bg="indigo"] .footnote { color: rgba(240,231,214,0.6); }
+
+  /* Tighter title for content-dense slides */
+  .title.sm { font-size: 2.9rem; margin-bottom: 0.7rem; }
+  .title.xs { font-size: 2.3rem; margin-bottom: 0.6rem; }
+
+  /* Narrow or very short windows: collapse multi-column groupings rather than
+     letting cards overflow their rounded boxes. */
+  @media (max-width: 820px) {
+    .card-grid-vertical { grid-template-columns: 1fr; }
+    .card-h { flex-direction: column; gap: 0.5rem; }
+    .split, .split.wide-left, .veto-row { grid-template-columns: 1fr; }
+  }
+  @media (max-height: 520px) {
+    .slide { padding: 5vh min(7vw, 10rem); }
+    .card-grid-vertical { gap: 1rem; margin-top: 1.2rem; }
+    .card { padding: 1.4rem 1.3rem; }
+    .toc-item { padding: 0.7rem 0; }
+  }
+</style>
+</head>
+<body class="" style="overscroll-behavior-x: auto;">
+
+<div id="deck">
+
+  <!-- Slide 1: Title (dark hero) -->
+  <section class="slide slide-title" data-bg="indigo" data-chrome="dark" id="slide-0">
+    <p class="kicker">MKIK AI Hackathon · Belső szabályzat-asszisztens</p>
+    <h1 class="title">A szabályzat, amit kérdezni lehet.</h1>
+    <p class="subtitle">Nem chatbot, hanem hivatkozásmotor. Minden válasz mellett ott a dokumentum, az oldal és a szó szerinti idézet, vagy pedig jelzi, ha nincs elégséges információ.
+</p>
+  </section>
+
+  <!-- Slide 2: Table of contents -->
+  <section class="slide" data-bg="cream" id="slide-1">
+    <p class="kicker">Tartalom</p>
+    <h1 class="title">Amiről szó lesz</h1>
+    <ul class="toc-list">
+      <li class="toc-item no-nav" data-jump="2"><span class="toc-num">01</span><span class="toc-label">A probléma</span></li>
+      <li class="toc-item no-nav" data-jump="3"><span class="toc-num">02</span><span class="toc-label">A megoldásunk — élő demó</span></li>
+      <li class="toc-item no-nav" data-jump="4"><span class="toc-num">03</span><span class="toc-label">Saját ötletek — bővítés</span></li>
+      <li class="toc-item no-nav" data-jump="5"><span class="toc-num">04</span><span class="toc-label">Kiindulás — a valós számok</span></li>
+      <li class="toc-item no-nav" data-jump="6"><span class="toc-num">05</span><span class="toc-label">Skálázhatóság &amp; biztonság</span></li>
+      <li class="toc-item no-nav" data-jump="7"><span class="toc-num">06</span><span class="toc-label">Ár — lokális vs. felhő</span></li>
+      <li class="toc-item no-nav" data-jump="8"><span class="toc-num">07</span><span class="toc-label">Miért mi</span></li>
+    </ul>
+  </section>
+
+  <!-- Slide 3: Problem (quote + list) -->
+  <section class="slide" data-bg="cream" id="slide-2">
+    <p class="kicker">01 · A probléma</p>
+    <div class="split wide-left">
+      <div class="quote-block">
+        <p class="q">A munkatársak folyosói pletykákra hagyatkoznak — pedig van egy tök jó beszerzési szabályzat.</p>
+        <p class="cite">— az MKIK informatikai vezetője, a helyszínen</p>
+      </div>
+      <ul class="lead-list">
+        <li><b>Nem tudják, hogy létezik</b> a szabályzat — vagy tudják, de rosszul ismerik, főleg az értékhatároknál.</li>
+        <li><b>2–3 óra keresgélés</b> jogász írta szövegben — vagy rosszul viszik végig a folyamatot, és <b>aláíráskor bukik ki</b>.</li>
+        <li>A téves belső válasz <b>a kamara nevében megy tovább</b> a taghoz, hatósághoz — ezért kerül többe, mint a meg nem válaszolt kérdés.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Slide 4: Solution / live demo -->
+  <section class="slide" data-bg="cream" id="slide-3">
+    <p class="kicker">02 · A megoldásunk · élő demó</p>
+    <h1 class="title xs">Működik — és ellenőrizhető</h1>
+    <div class="split" style="margin-top:1.2rem;">
+      <div class="browser">
+        <div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">localhost:5173/kerdes</span></div>
+        <div class="bapp">
+          <span class="ent">▾ Entitás: MKIK</span>
+          <div class="ask">„10 db irodai asztalt vennék, nettó 1,2 M Ft-ért. Elég 3 ajánlat?"</div>
+          <div class="ans">
+            <p>Igen. 1 000 001 – 5 000 000 Ft között ez a <b>II. kategória</b>: legalább <b>3 írásbeli ajánlat</b> kötelező, jóváhagyó a <b>gazdasági vezető</b>.</p>
+            <div class="src">
+              <div class="sh">✓ Kódban ellenőrzött forrás</div>
+              <p class="sq">„II. · 1 000 001 – 5 000 000 Ft · Legalább 3 írásbeli ajánlat · gazdasági vezető"</p>
+              <p class="sref">Beszerzési Szabályzat · 10. § · 6. oldal</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="browser">
+        <div class="bbar"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">localhost:5173/kerdes</span></div>
+        <div class="bapp">
+          <span class="ent">▾ Entitás: MKIK</span>
+          <div class="ask">„Hány nap szabadság jár a 3. gyerek után?"</div>
+          <div class="ans noc">
+            <div class="flag">◇ Erre nincs fedezet a dokumentumokban</div>
+            <p>A beszerzési szabályzat nem rendelkezik szabadságról. Nem tippelek.</p>
+            <p class="route">Ez a <b>HR / humánpolitikai terület</b> hatásköre — fordulj hozzájuk.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="veto-row">
+      <div class="veto">
+        <div class="vh">⚠ Vétó 1 — entitás-szeparáció</div>
+        <p>A válasz <b>csak az adott entitás dokumentumából</b> jöhet. 23 kamara egy rendszerben, keveredés nélkül: minden szövegrészlet entitás-címkét kap, a keresés eleve szűr.</p>
+      </div>
+      <div class="veto">
+        <div class="vh">⚠ Vétó 2 — tippelés = kizárás</div>
+        <p>A 3 ajánlat vs. nyílt közbeszerzés tévedés a <b>közbeszerzési érték tízszeresébe</b> kerülhet + sajtóbotrány. Ezért a hivatkozás nálunk <b>kódban visszaellenőrzött tény</b>.</p>
+      </div>
+    </div>
+    <p class="footnote">A képek a futó rendszerből. A valódi demót élőben, a zsűri saját kérdésével futtatjuk.</p>
+  </section>
+
+  <!-- Slide 5: Own ideas -->
+  <section class="slide" data-bg="cream" id="slide-4">
+    <p class="kicker">03 · Saját ötleteink · a vezetőktől, beépítve · +10 pont</p>
+    <h1 class="title xs">Amivel bővíthető</h1>
+    <div class="split" style="margin-top:1rem;">
+      <div>
+        <p class="col-h" style="color:var(--rust);">„Kitől kérdezd" — szervezeti felelősség</p>
+        <p style="font-weight:500;font-size:0.98rem;line-height:1.45;opacity:0.8;max-width:36ch;">Ha a kérdésre <b>nincs adatunk</b>, a rendszer nem csöndben elakad: a „nincs fedezet" mellé rögtön <b>a felelőshöz dob</b> — kihez fordulj. A szabályzat 7. §-ának valós szereplőivel.</p>
+        <div class="org">
+          <div class="onode top"><div class="orole">Jóváhagyó · IV. kat.</div><div class="oname">Elnökség</div></div>
+          <div class="ostem"></div><div class="orail"></div><div class="ostem"></div>
+          <div class="orow">
+            <div class="onode"><div class="orole">III. kat.</div><div class="oname">Főtitkár</div></div>
+            <div class="onode"><div class="orole">Fedezet · közbesz.</div><div class="oname">Gazdasági vezető</div></div>
+            <div class="onode"><div class="orole">Lebonyolítás</div><div class="oname">Beszerzési felelős</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="col-h" style="color:var(--rust);">Kérdés-toplista</p>
+        <p style="font-weight:500;font-size:0.98rem;line-height:1.45;opacity:0.8;max-width:36ch;margin-bottom:1rem;">Minden kérdést naplózunk: mit kérdeznek a legtöbben, és <b>mire nincs fedezet</b> — ez megmutatja, hol hiányos a szabályozás. Később <b>felhasználótípusonként egyedi</b>: az IT, a HR és a beszerzés más toplistát lát.</p>
+        <div class="card" style="padding:1.4rem 1.5rem;">
+          <ul class="lead-list" style="margin-top:0;gap:0.7rem;">
+            <li>Elég 3 ajánlat, vagy közbeszerzés? <b style="color:var(--rust);">·142</b></li>
+            <li>Ki hagyja jóvá az értékhatárt? <b style="color:var(--rust);">·118</b></li>
+            <li>Szerződésminta? <b style="color:var(--rust);">◇ nincs fedezet ·37</b></li>
+          </ul>
+        </div>
+        <p class="footnote" style="margin-top:1rem;">„Ha visszamérnénk, abból kijönne egy toplista." — az igényt maga a megrendelő mondta ki.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 6: Starting numbers -->
+  <section class="slide" data-bg="indigo" data-chrome="dark" id="slide-5">
+    <p class="kicker">04 · A három szempont · a kiindulás</p>
+    <h1 class="title sm">A kamara nem demót vásárol, hanem évekig üzemeltetett rendszert.</h1>
+    <div class="card-grid-vertical">
+      <div class="card"><div class="num">23</div><h3>területi kamara</h3><p>Egy rendszer, entitásonként külön dokumentumkészlet. Legalább 12–13-nak semmilyen felhője nincs.</p></div>
+      <div class="card"><div class="num">70–80</div><h3>kérdés / nap</h3><p>Közösen belőtt szám. IT-hez 1–2, beszerzéshez 8–10, igazgatóságonként ~5. Akár 150-ig.</p></div>
+      <div class="card"><div class="num">&lt;1 GB</div><h3>összes adat</h3><p>A skála nem a dokumentumszám — a valódi szorzó a 23 önálló kamara replikálása.</p></div>
+    </div>
+    <p class="footnote">Forrás: helyszíni egyeztetés az informatikai és beszerzési igazgatóval. A következő diák ezekből számolnak.</p>
+  </section>
+
+  <!-- Slide 8: Scalability & security -->
+  <section class="slide" data-bg="cream" id="slide-6">
+    <p class="kicker">05 · Skálázhatóság &amp; biztonság · súly 15%</p>
+    <h1 class="title xs">A valódi szorzó nem a dokumentum — a 23 kamara</h1>
+    <div class="split" style="margin-top:1rem;">
+      <div>
+        <p class="col-h">×10 mennyiségnél</p>
+        <ul class="lead-list" style="margin-top:0.4rem;">
+          <li><b>Változatlan:</b> az architektúra. &lt;1 GB → &lt;10 GB meg sem kottyan.</li>
+          <li><b>Lineáris:</b> az LLM-költség a kérdésszámmal.</li>
+          <li><b>A valódi feladat:</b> 23 telepítés → <b>tenant-mező + csomagolt Linux VM</b>. „Emeld be a virtualizációba."</li>
+        </ul>
+      </div>
+      <div>
+        <p class="col-h">Biztonság — köztestületnél alap</p>
+        <div class="card" style="padding:1.3rem 1.5rem;">
+          <ul class="lead-list" style="margin-top:0;gap:0.65rem;">
+            <li><b>Entitás-izoláció</b> — egy kamara adata nem szivárog a másikba.</li>
+            <li><b>Lokális embedding</b> — a dokumentum fel sem dolgozáskor nem hagyja el a gépet.</li>
+            <li><b>EU-s, GDPR-konform tároló</b> felhős opciónál, a havidíjban.</li>
+            <li><b>Teljes lokális mód</b> is adható, minőségi kompromisszummal.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 9: Cost -->
+  <section class="slide" data-bg="cream" id="slide-7">
+    <p class="kicker">06 · Ár · súly 15% · kiszámolva</p>
+    <h1 class="title xs">Aki azt mondja „olcsó", nem számolta ki - mi igen</h1>
+    <div class="cost-wrap">
+      <table class="cost">
+        <thead>
+          <tr><th>Tétel · 75 kérdés/nap × 21 nap ≈ 1 600 kérdés/hó</th><th class="hl">Lokális LLM</th><th class="hl">Felhő (prémium API, EU)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1 kérdés megválaszolása</td><td class="v">~1–3 Ft*</td><td class="v">~5–12 Ft</td></tr>
+          <tr><td>Egyszeri beüzemelés</td><td class="v">~40–80 e Ft<span>helyi modell + betöltés</span></td><td class="v">~15–30 e Ft<span>felhő beállítás + betöltés</span></td></tr>
+          <tr><td>Infra / hó (1 entitás)</td><td class="v">~8–15 e Ft<span>VPS + helyi modell</span></td><td class="v">~3–6 e Ft<span>EU tároló + futtatás</span></td></tr>
+          <tr class="total"><td>Havi üzemeltetés / kamara</td><td class="v">~8–15 e Ft</td><td class="v">~11–26 e Ft<span>infra + LLM</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="costnote">*Lokálisnál a per-kérdés díj minimális (áram/erőforrás), a fő tétel a fix infra; a <b>töréspont ~150+ kérdés/nap</b>. Felhőnél a havi LLM-költség ~8–20 e Ft (1 600 kérdésre) az infrán felül. Megtérülés: kérdésenként fél–két óra megspórolt keresés → <b>havi több száz munkaóra</b>. Faragható: gyengébb helyi modell vagy olcsóbb API — a válaszminőség rovására.</p>
+  </section>
+
+  <!-- Slide 10: Closing -->
+  <section class="slide" data-bg="indigo" data-chrome="dark" id="slide-8">
+    <p class="kicker">07 · Miért mi</p>
+    <h1 class="title sm">A miénk inkább azt mondja: „nem tudom" — és megmondja, kihez fordulj.</h1>
+    <div class="cta-row">
+      <span class="arrow">→</span>
+      <span class="email">„Kuka az egész, ha tippel." — ezért nem tippel.</span>
+    </div>
+    <div class="mark">
+      <svg width="160" height="70" viewBox="0 0 240 150" aria-hidden="true">
+        <line x1="50" y1="45" x2="50" y2="105" stroke="#EA2E00" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="50" y1="105" x2="120" y2="45" stroke="#EA2E00" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="120" y1="45" x2="120" y2="105" stroke="#EA2E00" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="120" y1="45" x2="190" y2="105" stroke="#EA2E00" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="190" y1="45" x2="120" y2="105" stroke="#EA2E00" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="190" y1="45" x2="190" y2="105" stroke="#EA2E00" stroke-width="4" stroke-linecap="round"></line>
+        <circle cx="50" cy="45" r="14" fill="#EA2E00"></circle>
+        <circle cx="120" cy="45" r="14" fill="#EA2E00"></circle>
+        <circle cx="190" cy="45" r="14" fill="#EA2E00"></circle>
+        <circle cx="50" cy="105" r="14" fill="#F0E7D6"></circle>
+        <circle cx="120" cy="105" r="14" fill="#F0E7D6"></circle>
+        <circle cx="190" cy="105" r="14" fill="#F0E7D6"></circle>
+      </svg>
+    </div>
+  </section>
+
+</div>
+
+<div class="edit-bar">
+  <span>Edit mode · click any text to change it</span>
+  <span class="edit-actions">
+    <button id="exportBtn">Export edited copy</button>
+    <button id="exitEditBtn" class="ghost">Done (Esc)</button>
+  </span>
+</div>
+
+<div class="hint"><kbd>P</kbd> teljes képernyő · <kbd>E</kbd> szöveg szerkesztése · ← → vagy görgetés a lapozáshoz</div>
+
+<div class="deck-chrome">
+  <span class="counter" id="counter">03 / 09</span>
+  <div class="nav-buttons">
+    <button id="prevBtn" aria-label="Previous slide">←</button>
+    <button id="nextBtn" aria-label="Next slide">→</button>
+  </div>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  let current = 0;
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function updateCounter() { counter.textContent = pad(current + 1) + ' / ' + pad(slides.length); }
+  function updateChrome() {
+    const dark = slides[current].getAttribute('data-chrome') === 'dark';
+    document.body.classList.toggle('dark-chrome', dark);
+    document.body.setAttribute('data-editing-dark', String(dark));
+  }
+  function goTo(i) {
+    if (i < 0) i = 0;
+    if (i >= slides.length) i = slides.length - 1;
+    current = i;
+    slides[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updateCounter(); updateChrome();
+  }
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  /* ---------- Edit mode ---------- */
+  const EDITABLE = [
+    '.kicker', '.title', '.subtitle',
+    '.toc-num', '.toc-label',
+    '.card .num', '.card h3', '.card p',
+    '.card-h .num', '.card-h .body h3', '.card-h .body p',
+    '.cta-row .email'
+  ].join(', ');
+
+  let editing = false;
+
+  function setEdit(on) {
+    editing = on;
+    document.body.classList.toggle('edit-mode', on);
+    document.querySelectorAll(EDITABLE).forEach((el) => {
+      if (on) el.setAttribute('contenteditable', 'plaintext-only');
+      else el.removeAttribute('contenteditable');
+    });
+    if (!on) document.querySelectorAll('[contenteditable]').forEach((el) => el.removeAttribute('contenteditable'));
+    updateChrome();
+  }
+
+  /* Paste as plain text so pasted rich text can't smuggle in foreign fonts or
+     colors and break the brand system. */
+  document.addEventListener('paste', (e) => {
+    if (!editing || !e.target.isContentEditable) return;
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, text);
+  });
+
+  function exportDeck() {
+    const wasEditing = editing;
+    setEdit(false);
+    const clone = document.documentElement.cloneNode(true);
+    clone.querySelectorAll('[contenteditable]').forEach((el) => el.removeAttribute('contenteditable'));
+    const cbody = clone.querySelector('body');
+    cbody.classList.remove('edit-mode', 'is-fullscreen', 'dark-chrome');
+    cbody.removeAttribute('data-editing-dark');
+    const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (document.title || 'deck').trim().replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() + '.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    if (wasEditing) setEdit(true);
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', (e) => { e.stopPropagation(); exportDeck(); });
+  document.getElementById('exitEditBtn').addEventListener('click', (e) => { e.stopPropagation(); setEdit(false); });
+
+  document.getElementById('nextBtn').addEventListener('click', (e) => { e.stopPropagation(); next(); });
+  document.getElementById('prevBtn').addEventListener('click', (e) => { e.stopPropagation(); prev(); });
+
+  slides.forEach((slide) => {
+    slide.addEventListener('click', (e) => {
+      if (editing) return;
+      const navEl = e.target.closest('.no-nav');
+      if (navEl) {
+        const jump = navEl.getAttribute('data-jump');
+        if (jump !== null) goTo(parseInt(jump, 10));
+        return;
+      }
+      const rect = slide.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      if (x < rect.width * 0.22) prev(); else next();
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    /* Cmd/Ctrl+S exports, in or out of edit mode. */
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); exportDeck(); return; }
+
+    /* While editing, the keyboard belongs to the text: arrows move the caret,
+       letters type. Only Escape is reserved, to leave edit mode. */
+    if (editing) {
+      if (e.key === 'Escape') { e.preventDefault(); setEdit(false); }
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); next(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); prev(); }
+    else if (e.key.toLowerCase() === 'p') { e.preventDefault(); toggleFullscreen(); }
+    else if (e.key.toLowerCase() === 'e') { e.preventDefault(); setEdit(true); }
+  });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen();
+  }
+  document.addEventListener('fullscreenchange', () => {
+    document.body.classList.toggle('is-fullscreen', !!document.fullscreenElement);
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+        current = slides.indexOf(entry.target);
+        updateCounter(); updateChrome();
+      }
+    });
+  }, { threshold: [0.6] });
+  slides.forEach((s) => observer.observe(s));
+
+  updateCounter(); updateChrome();
+</script>
+
+
+
+</body></html>
