@@ -34,8 +34,8 @@ LLM (only ever sees evidence the caller was allowed to retrieve)
 ```
 
 The system never retrieves forbidden content and hides it in the UI
-afterward — a forbidden chunk is invisible to search entirely. `scope_from_
-request` in `app/pipeline.py` is where a real identity provider would plug in
+afterward — a forbidden chunk is invisible to search entirely. `scope_from_request`
+in `app/pipeline.py` is where a real identity provider would plug in
 to populate the scope on every request; the demo UI's org/role selectors are
 a stand-in for that.
 
