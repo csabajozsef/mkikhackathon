@@ -21,7 +21,7 @@ Built for the **MKIK AI Hackathon**, 2026-08-28 — **🥈 2nd place**.
 **Presentation:** [`docs/presentation/pitch-deck.html`](docs/presentation/pitch-deck.html)
 (Hungarian, as presented) · pitch script: [`docs/pitch.md`](docs/pitch.md).
 
-**Internal (team only):** [working Google Doc](https://docs.google.com/document/d/1HnT13rSFP630dp-_kCg_-N07vKKAw-rtVQaPw_wHO_E/edit?usp=sharing)
+**Internal (team only):** working Google Doc (link intentionally omitted from this public README).
 — team notes from the hackathon, not part of the public documentation.
 
 ## What we built
