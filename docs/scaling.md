@@ -32,8 +32,8 @@ independent chambers, each wanting their own isolated deployment, does.
 - **Storage** — trivial at <1 GB today; grows with each chamber's own corpus.
 - **Concurrent query handling** — single-process FastAPI today.
 - **Access-control filtering in the hot path** — `_allowed_rows` in
-  `app/retrieval/store.py` already filters before retrieval; this needs to
-  stay a pre-retrieval step (not a post-hoc UI hide) as concurrency grows.
+  `app/retrieval/store.py` applies the scope filter before selecting and returning
+  any retrieval results; this needs to stay in the retrieval path (not a post-hoc UI hide) as concurrency grows.
 - **Observability** — none today beyond the query log.
 
 ## Suggested evolution
